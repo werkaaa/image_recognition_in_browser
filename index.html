@@ -5,13 +5,43 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <title>mnist1</title>
+    <title>onions vs pineapples</title>
 </head>
 <body>
 <noscript>
     <strong>We're sorry but mnist1 doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
 </noscript>
-<div id="app"></div>
+<div id="app">
+
+    <div class="note">
+        {{ status }}
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="input-canvas"
+                width="140"
+                height="140"
+                @mousemove="draw"
+        />
+    </div>
+
+    <button id="clear_value" @click="clear">Clear</button>
+    <button id="inference" @click="inference">
+        Inference
+    </button>
+
+    <table>
+        <tr>
+            <th>Digits</th>
+            <th>Probability</th>
+        </tr>
+        <tr v-for="(pred, index) in preds">
+            <td>{{ index }}</td>
+            <td>{{ readable(pred) }}</td>
+        </tr>
+    </table>
+
+</div>
 <!-- built files will be auto injected -->
 </body>
 </html>
