@@ -1,84 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-
-    <title>onions vs pineapples</title>
+    <meta charset="UTF-8">
+    <title>airplanes vs onions</title>
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-<noscript>
-    <strong>We're sorry but mnist1 doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-</noscript>
-<div id="app">
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"> </script>
 
-    <div class="note">
-        {{ status }}
-    </div>
+<div id="app">
+    <div class="note">{{Status}}</div>
 
     <div class="canvas-container">
         <canvas id="input-canvas"
                 width="140"
                 height="140"
                 @mousemove="draw"
-        ></canvas>
+        />
     </div>
 
     <button id="clear_value" @click="clear">Clear</button>
-    <button id="inference" @click="inference">
-        Inference
-    </button>
+    <button id="show_pixels" @click="show">Show</button>
+    <button id="inference" @click="inference">Inference</button>
 
-    <table>
-        <tr>
-            <th>Digits</th>
-            <th>Probability</th>
-        </tr>
-        <tr v-for="(pred, index) in preds">
-            <td>{{ index }}</td>
-            <td>{{ readable(pred) }}</td>
-        </tr>
-    </table>
+    <div class="ans">{{Answer}}</div>
 
 </div>
-<!-- built files will be auto injected -->
+
+
 <script>
-    import Predictor from './predictor';
+    class Predictor {
+
+        constructor() {
+            this.model = null;
+        }
+
+        async load(model_url) {
+            try {
+                // this.model = await loadFrozenModel(model_url, weights_url);
+                this.model = await tf.loadModel(model_url)
+            } catch (e) {
+                console.log(e);
+            }
+        }
+
+        async predict(pixels) {
+            return tf.tidy(() => {
+                const xs = tf.tensor2d([pixels]);
+                return this.model.execute({x: xs})
+            }).dataSync();
+        }
+    }
+
     const MODEL_URL = 'model/model.json';
-    //const WEIGHTS_URL = 'weights_manifest.json';
+
     const HEIGHT = 28;
     const WIDTH = 28;
     const pixels = [];
+
     for (let i = 0; i < HEIGHT * WIDTH; i++) {
         pixels[i] = 0;
     }
+
     const preds = [];
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 2; i++) {
         preds[i] = 0;
     }
+
     var app = new Vue({
         el: '#app',
-        components: {},
-        data: function () {
-            return {
-                preds: preds,
-                predictor: new Predictor(),
-                pixels: pixels,
-                status: "Loading...",
-            }
-        },
-        created: function() {
-            this.predictor.load(MODEL_URL).then(() => {
-                this.status = "Model loaded!";
-            });
+        data: {
+            Status: 'Hello Vue!',
+            Answer: 'Draw airplane or onion',
+            predictor: new Predictor()
         },
         methods: {
-            readable(x) {
-                return x.toFixed(3);
-            },
             draw(e) {
                 if (e.buttons == 1) {
                     const ctx = document.getElementById('input-canvas').getContext('2d');
@@ -86,10 +82,10 @@
                     ctx.fillRect(e.offsetX, e.offsetY, 8, 8);
                     const x = Math.floor(e.offsetY * 0.2);
                     const y = Math.floor(e.offsetX * 0.2) + 1;
-                    for (let dy = 0; dy < 2; dy++){
-                        for (let dx = 0; dx < 2; dx++){
+                    for (let dy = 0; dy < 2; dy++) {
+                        for (let dx = 0; dx < 2; dx++) {
                             if ((x + dx < WIDTH) && (y + dy < HEIGHT)) {
-                                this.pixels[(y+dy) + (x+dx) * HEIGHT] = 1
+                                pixels[(y + dy) + (x + dx) * HEIGHT] = 1
                             }
                         }
                     }
@@ -99,18 +95,27 @@
                 const ctx = document.getElementById('input-canvas').getContext('2d');
                 ctx.fillStyle = "rgb(255,255,255)";
                 ctx.fillRect(0, 0, 140, 140);
-                for (var i = 0; i < 28*28; i++) {
-                    this.pixels[i] = 0;
+                for (var i = 0; i < 28 * 28; i++) {
+                    pixels[i] = 0;
                 }
+                },
+            show() {
+                console.log(pixels)
             },
             inference() {
-                this.predictor.predict(this.pixels).then((value) => {
-                    this.preds = Array.prototype.slice.call(value);
+                self.predictor.load(MODEL_URL).then(() => {
+                    console.log("Model loaded!");
                 });
+                console.log(MODEL_URL);
+                console.log(pixels);
+                self.predictor.predict(pixels).then((value) => {
+                    preds;
+                });
+                console.log(preds);
             }
-        }
-    }
+    }})
 </script>
+
 <style >
     #app {
         font-family: 'Avenir', Helvetica, Arial, sans-serif;
@@ -128,5 +133,6 @@
     table {
     }
 </style>
+
 </body>
 </html>
