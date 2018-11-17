@@ -25,6 +25,17 @@
 
     <div class="ans">{{Answer}}</div>
 
+    <table>
+        <tr>
+            <th>Digits</th>
+            <th>Probability</th>
+        </tr>
+        <tr v-for="(pred, index) in preds">
+            <td>{{ index }}</td>
+            <td>{{ readable(pred) }}</td>
+        </tr>
+    </table>
+
 </div>
 
 
@@ -44,12 +55,13 @@
             }
         }
 
-        async predict(pixels) {
-            return tf.tidy(() => {
-                const xs = tf.tensor2d([pixels]);
-                return this.model.execute({x: xs})
-            }).dataSync();
-        }
+     //   async predict1(pixels) {
+            //return tf.tidy(() => {
+              //  const xs = tf.tensor2d([pixels]);
+               // return this.model.predict({x: xs})
+     //       }).dataSync();
+
+      //  }
     }
 
     const MODEL_URL = 'model/model.json';
@@ -69,12 +81,28 @@
 
     var app = new Vue({
         el: '#app',
-        data: {
-            Status: 'Hello Vue!',
-            Answer: 'Draw airplane or onion',
-            predictor: new Predictor()
+        data: function () {
+                return {
+                    preds: preds,
+                    predictor: new Predictor(),
+                    pixels: pixels,
+                    Status: "Loading...",
+                    Answer: 'Draw airplane or onion',
+                }
+           // Status: 'Hello Vue!',
+            //Answer: 'Draw airplane or onion',
+            //predictor: new Predictor()
+        },
+        created: function() {
+            this.predictor.load(MODEL_URL).then(() => {
+                this.Status = "Model loaded!";
+                //console.log(this.predictor.model.output)
+            });
         },
         methods: {
+            readable(x) {
+                return x.toFixed(3);
+            },
             draw(e) {
                 if (e.buttons == 1) {
                     const ctx = document.getElementById('input-canvas').getContext('2d');
@@ -85,7 +113,7 @@
                     for (let dy = 0; dy < 2; dy++) {
                         for (let dx = 0; dx < 2; dx++) {
                             if ((x + dx < WIDTH) && (y + dy < HEIGHT)) {
-                                pixels[(y + dy) + (x + dx) * HEIGHT] = 1
+                                this.pixels[(y + dy) + (x + dx) * HEIGHT] = 1
                             }
                         }
                     }
@@ -96,24 +124,22 @@
                 ctx.fillStyle = "rgb(255,255,255)";
                 ctx.fillRect(0, 0, 140, 140);
                 for (var i = 0; i < 28 * 28; i++) {
-                    pixels[i] = 0;
+                    this.pixels[i] = 0;
                 }
+                console.log(this.preds);
                 },
             show() {
-                console.log(pixels)
+                console.log(this.pixels)
             },
             inference() {
-                self.predictor.load(MODEL_URL).then(() => {
-                    console.log("Model loaded!");
-                });
-                console.log(MODEL_URL);
-                console.log(pixels);
-                self.predictor.predict(pixels).then((value) => {
-                    preds;
-                });
-                console.log(preds);
-            }
-    }})
+
+               // this.preds = model.predict(this.pixels).dataSync()
+                //this.pixels = tf.tensor2d(this.pixels);
+                //console.log([this.pixels]);
+                //this.predictor.model.predict(tf.tensor4d(this.pixels, [1,28,28,1])).dataSync().then((value) => {
+                    this.preds = this.predictor.model.predict(tf.tensor4d(this.pixels, [1,28,28,1])).dataSync();
+               // })
+    }}})
 </script>
 
 <style >
