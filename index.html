@@ -38,10 +38,12 @@
             <td>{{ pin }}</td>
         </tr>
 
+<!--
 		<tr v-for="(pred, index) in preds">
 			<td>{{ index }}</td>
 			<td>{{ readable(pred) }}</td>
 		</tr>
+-->
     </table>
     
 
@@ -89,10 +91,6 @@
         preds[i] = 0;
     }
     
-    const names = [];
-    
-    names[0] = 'onions';
-    names[1] = 'pineapples';
     
     var on;
     var pin;
@@ -161,8 +159,8 @@
                 //console.log([this.pixels]);
                 //this.predictor.model.predict(tf.tensor4d(this.pixels, [1,28,28,1])).dataSync().then((value) => {
                     this.preds = this.predictor.model.predict(tf.tensor4d(this.pixels, [1,28,28,1])).dataSync();
-                    this.on = readable(this.preds[0]);
-                    this.pin = readable(this.preds[1]);
+                    this.on = this.preds[0];
+                    this.pin = this.preds[1];
                // })
     }}})
 </script>
