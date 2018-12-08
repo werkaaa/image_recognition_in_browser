@@ -20,21 +20,30 @@
     </div>
 
     <button id="clear_value" @click="clear">Clear</button>
-    <button id="show_pixels" @click="show">Show</button>
     <button id="inference" @click="inference">Inference</button>
 
     <div class="ans">{{Answer}}</div>
 
     <table>
         <tr>
-            <th>Digits</th>
+            <th>Class</th>
             <th>Probability</th>
         </tr>
-        <tr v-for="(pred, index) in preds">
-            <td>{{ index }}</td>
-            <td>{{ readable(pred) }}</td>
+        <tr>
+            <th>onion</th>
+            <td>{{ on }}</td>
         </tr>
+        <tr>
+            <th>pineapple</th>
+            <td>{{ pin }}</td>
+        </tr>
+
+		<tr v-for="(pred, index) in preds">
+			<td>{{ index }}</td>
+			<td>{{ readable(pred) }}</td>
+		</tr>
     </table>
+    
 
 </div>
 
@@ -75,8 +84,20 @@
     }
 
     const preds = [];
-    preds['onions'] = 0;
-    preds['pineapples'] = 0;
+        
+    for (let i = 0; i < 2; i++) {
+        preds[i] = 0;
+    }
+    
+    const names = [];
+    
+    names[0] = 'onions';
+    names[1] = 'pineapples';
+    
+    var on;
+    var pin;
+
+    
 
 
     var app = new Vue({
@@ -88,6 +109,8 @@
                     pixels: pixels,
                     Status: "Loading...",
                     Answer: 'Draw airplane or onion',
+                    on: on,
+                    pin: pin,
                 }
            // Status: 'Hello Vue!',
             //Answer: 'Draw airplane or onion',
@@ -128,9 +151,9 @@
                 }
                 console.log(this.preds);
                 },
-            show() {
-                console.log(this.pixels)
-            },
+            //show() {
+             //   console.log(this.pixels)
+            //},
             inference() {
 
                // this.preds = model.predict(this.pixels).dataSync()
@@ -138,6 +161,8 @@
                 //console.log([this.pixels]);
                 //this.predictor.model.predict(tf.tensor4d(this.pixels, [1,28,28,1])).dataSync().then((value) => {
                     this.preds = this.predictor.model.predict(tf.tensor4d(this.pixels, [1,28,28,1])).dataSync();
+                    this.on = this.preds[0];
+                    this.pin = this.preds[1];
                // })
     }}})
 </script>
