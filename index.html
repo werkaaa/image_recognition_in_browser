@@ -6,7 +6,7 @@
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.12.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"> </script>
 
 
 <div id="app">
@@ -61,7 +61,7 @@
         async load(model_url) {
             try {
                 // this.model = await loadFrozenModel(model_url, weights_url);
-                this.model = await tf.loadModel(model_url)
+                this.model = await tf.loadLayersModel(model_url)
             } catch (e) {
                 console.log(e);
             }
